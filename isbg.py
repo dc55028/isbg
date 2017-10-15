@@ -588,7 +588,14 @@ for u in uids:
                 continue
             p.stdin.close()
             body = crnlify(body)
-            res = imap.append(spaminbox, None, None, body)
+            #res = imap.append(spaminbox, None, None, body)
+            try:
+                res = imap.append(spaminbox, None, None, body)
+            except imap.abort:
+                imap = imaplib.IMAP4_SSL(imaphost, imapport)
+                imap.login(imapuser, imappasswd)
+                imap.select(imapinbox, 1)
+                res = imap.append(spaminbox, None, None, body)
             # The above will fail on some IMAP servers for various reasons.
             # we print out what happened and continue processing
             if res[0] != 'OK':
