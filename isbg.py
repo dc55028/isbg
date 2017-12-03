@@ -423,8 +423,15 @@ if opts["--nossl"] is True:
 else:
     imap = imaplib.IMAP4_SSL(imaphost, imapport)
 
-# Authenticate (only simple supported)
-res = imap.login(imapuser, imappasswd)
+# Authenticate (only simple supported), retrying once if failed (trying to fix issue #37
+try:
+    res = imap.login(imapuser, imappasswd)
+except imap.abort:
+    if opts["--nossl"] is True:
+        imap = imaplib.IMAP4(imaphost, imapport)
+    else:
+        imap = imaplib.IMAP4_SSL(imaphost, imapport)
+    imap.login(imapuser, imappasswd)
 assertok(res, "login", imapuser, 'xxxxxxxx')
 
 # List imap directories
