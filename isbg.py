@@ -431,7 +431,7 @@ except imap.abort:
         imap = imaplib.IMAP4(imaphost, imapport)
     else:
         imap = imaplib.IMAP4_SSL(imaphost, imapport)
-    imap.login(imapuser, imappasswd)
+    res = imap.login(imapuser, imappasswd)
 assertok(res, "login", imapuser, 'xxxxxxxx')
 
 # List imap directories
