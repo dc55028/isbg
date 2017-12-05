@@ -416,21 +416,28 @@ def assertok(res, *args):
         errorexit("\n%s returned %s - aborting\n"
                   % (repr(args), res), exitcodeimap)
 
-# Main code starts here
+# this functions attemps to establish an IMAP4 connection
+def imap4(imaphost, imapport):
+    if opts["--nossl"] is True:
+        imap = imaplib.IMAP4(imaphost, imapport)
+    else:
+        imap = imaplib.IMAP4_SSL(imaphost, imapport)
+    return imap
 
-if opts["--nossl"] is True:
-    imap = imaplib.IMAP4(imaphost, imapport)
-else:
-    imap = imaplib.IMAP4_SSL(imaphost, imapport)
+# Main code starts here
+try:
+    imap = imap4(imaphost, imapport)
+except socket.error:
+    imap = imap4(imaphost, imapport)
 
 # Authenticate (only simple supported), retrying once if failed (trying to fix issue #37
 try:
     res = imap.login(imapuser, imappasswd)
 except imap.abort:
-    if opts["--nossl"] is True:
-        imap = imaplib.IMAP4(imaphost, imapport)
-    else:
-        imap = imaplib.IMAP4_SSL(imaphost, imapport)
+    try:
+        imap = imap4(imaphost, imapport)
+    except socket.error:
+        imap = imap4(imaphost, imapport)
     res = imap.login(imapuser, imappasswd)
 assertok(res, "login", imapuser, 'xxxxxxxx')
 
