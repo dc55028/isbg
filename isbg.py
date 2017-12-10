@@ -75,6 +75,7 @@ import getpass
 import string
 import time
 import atexit
+from socket import error as socket_error
 
 try:
     from hashlib import md5
@@ -427,7 +428,7 @@ def imap4(imaphost, imapport):
 # Main code starts here
 try:
     imap = imap4(imaphost, imapport)
-except socket.error:
+except socket_error:
     imap = imap4(imaphost, imapport)
 
 # Authenticate (only simple supported), retrying once if failed (trying to fix issue #37
@@ -436,7 +437,7 @@ try:
 except imap.abort:
     try:
         imap = imap4(imaphost, imapport)
-    except socket.error:
+    except socket_error:
         imap = imap4(imaphost, imapport)
     res = imap.login(imapuser, imappasswd)
 assertok(res, "login", imapuser, 'xxxxxxxx')
